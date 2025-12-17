@@ -1,67 +1,32 @@
-📧 Email Spam Detector
-🔍 Project Overview
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0A1AFF,100:00C6FF&height=200&section=header&text=Email%20Spam%20Detector&fontSize=38&fontColor=ffffff" />
+</p>
 
-The Email Spam Detector is a Machine Learning–based system that classifies emails as Spam or Not Spam (Ham) using Natural Language Processing (NLP).
-It helps users automatically filter unwanted and malicious emails and can be connected to a user’s personal email account.
+<p align="center">
+  <b>Machine Learning based Email Spam Detection using NLP</b>
+</p>
 
-🎯 Problem Statement
+<p align="center">
+  <img src="https://img.shields.io/badge/Machine%20Learning-Naive%20Bayes-blue" />
+  <img src="https://img.shields.io/badge/NLP-TF--IDF-green" />
+  <img src="https://img.shields.io/badge/Framework-Flask-black" />
+  <img src="https://img.shields.io/badge/Status-Completed-success" />
+</p>
 
-Users receive a large number of spam emails such as advertisements and phishing messages.
-Manual filtering is inefficient.
-This project automates spam detection using Machine Learning for better accuracy and safety.
+---
 
-🛠️ Technologies Used
+## 📌 Overview
+The **Email Spam Detector** is a Machine Learning application that classifies emails as **Spam** or **Not Spam (Ham)** using **Natural Language Processing (NLP)** techniques.  
+It helps users automatically filter unwanted and potentially harmful emails and can also be connected to a user’s **personal email account** for real-time analysis.
 
-Language: Python
+---
 
-ML Model: Naive Bayes
+## 🎯 Objective
+To build an efficient and lightweight spam detection system that:
+- Reduces manual email filtering
+- Improves user safety
+- Demonstrates practical use of ML and NLP concepts
 
-NLP: Text Preprocessing
+---
 
-Feature Extraction: TF-IDF
-
-Framework: Flask
-
-Frontend: HTML, CSS
-
-Dataset: SMS Spam Collection (Kaggle)
-
-⚙️ System Flow
-Email Input → Text Preprocessing → TF-IDF → Naive Bayes → Spam / Ham
-
-🧠 Working
-
-Email text is taken as input (manual or personal email).
-
-Text is cleaned using NLP techniques.
-
-TF-IDF converts text into numerical features.
-
-Naive Bayes classifies the email as Spam or Ham.
-
-🚀 Features
-
-Automatic spam detection
-
-Real-time email classification
-
-Simple and user-friendly interface
-
-Can connect to personal email accounts
-
-📈 Result
-
-Achieved high accuracy in spam detection
-
-Naive Bayes performed efficiently for text classification
-
-▶️ How to Run
-git clone https://github.com/Daksh1685/Email-Spam-Detector
-cd Email-Spam-Detector
-pip install -r requirements.txt
-python app.py
-
-
-Open:
-
-http://127.0.0.1:5000/
+## ⚙️ System Architecture
