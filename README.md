@@ -1,32 +1,67 @@
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0A1AFF,100:00C6FF&height=200&section=header&text=Email%20Spam%20Detector&fontSize=38&fontColor=ffffff" />
-</p>
+# Machine Learning based Email Spam Detection using NLP
 
-<p align="center">
-  <b>Machine Learning based Email Spam Detection using NLP</b>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Machine%20Learning-Naive%20Bayes-blue" />
-  <img src="https://img.shields.io/badge/NLP-TF--IDF-green" />
-  <img src="https://img.shields.io/badge/Framework-Flask-black" />
-  <img src="https://img.shields.io/badge/Status-Completed-success" />
-</p>
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Naive%20Bayes-blue)
+![NLP](https://img.shields.io/badge/NLP-TF--IDF-green)
+![Framework](https://img.shields.io/badge/Framework-Flask-black)
+![Status](https://img.shields.io/badge/Status-Completed-success)
 
 ---
 
-## 📌 Overview
-The **Email Spam Detector** is a Machine Learning application that classifies emails as **Spam** or **Not Spam (Ham)** using **Natural Language Processing (NLP)** techniques.  
-It helps users automatically filter unwanted and potentially harmful emails and can also be connected to a user’s **personal email account** for real-time analysis.
+## Overview
+This project implements an **Email Spam Detection system** using **Machine Learning and Natural Language Processing (NLP)**.  
+It classifies emails as **Spam** or **Not Spam (Ham)** based on their content and can also be connected to a user’s **personal email account** for real-time analysis.
 
 ---
 
-## 🎯 Objective
-To build an efficient and lightweight spam detection system that:
-- Reduces manual email filtering
-- Improves user safety
-- Demonstrates practical use of ML and NLP concepts
+## Objective
+- Automatically detect spam emails  
+- Reduce manual email filtering  
+- Demonstrate practical application of ML and NLP concepts  
 
 ---
 
-## ⚙️ System Architecture
+## Workflow
+Email Input
+↓
+Text Preprocessing
+↓
+TF-IDF Feature Extraction
+↓
+Naive Bayes Classifier
+↓
+Spam / Ham Prediction
+
+
+---
+
+## Technologies Used
+- Python  
+- Naive Bayes Classifier  
+- Natural Language Processing (Text Cleaning, Tokenization)  
+- TF-IDF Vectorizer  
+- Flask  
+- HTML, CSS  
+- SMS Spam Collection Dataset (Kaggle)
+
+---
+
+## Features
+- Accurate email spam detection  
+- Fast and lightweight ML model  
+- Simple and user-friendly interface  
+- Supports personal email integration  
+
+---
+
+## Results
+- Achieved high accuracy on spam classification  
+- Efficient performance on text-based data  
+
+---
+
+## How to Run the Project
+```bash
+git clone https://github.com/Daksh1685/Email-Spam-Detector
+cd Email-Spam-Detector
+pip install -r requirements.txt
+python app.py
