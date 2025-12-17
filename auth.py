@@ -20,14 +20,26 @@ def get_google_flow():
         if not os.path.exists(CLIENT_SECRETS_FILE):
             raise FileNotFoundError(f"{CLIENT_SECRETS_FILE} not found. Please download credentials.json from Google Cloud Console.")
         
+        # Verify file is readable and valid JSON
+        with open(CLIENT_SECRETS_FILE, 'r') as f:
+            creds_data = json.load(f)
+        
+        print(f"[AUTH] Loading credentials from {CLIENT_SECRETS_FILE}")
+        print(f"[AUTH] Credentials structure: {list(creds_data.keys())}")
+        
         flow = Flow.from_client_secrets_file(
             CLIENT_SECRETS_FILE,
             scopes=SCOPES,
-            redirect_uri='http://localhost:8080/oauth2callback'
+            redirect_uri='http://localhost:8080/oauth2callback',
+            state=None  # Let Google generate the state
         )
+        print("[AUTH] OAuth flow created successfully")
         return flow
+    except json.JSONDecodeError as e:
+        print(f"[AUTH ERROR] JSON parse error: {str(e)}")
+        raise ValueError(f"credentials.json is not valid JSON: {str(e)}")
     except Exception as e:
-        print(f"Error creating OAuth flow: {str(e)}")
+        print(f"[AUTH ERROR] {str(e)}")
         raise
 
 def save_credentials(credentials):

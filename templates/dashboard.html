@@ -131,6 +131,16 @@
                             </div>
                         {% endif %}
                     </div>
+                    
+                    <!-- Load More Section -->
+                    <div class="text-center mt-4" id="loadMoreSection">
+                        <button id="loadMoreBtn" class="btn btn-outline-primary btn-lg" onclick="loadMoreEmails()">
+                            <i class="bi bi-arrow-down-circle"></i> Load More Emails
+                        </button>
+                        <div id="loadingSpinner" class="spinner-border text-primary d-none mt-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,6 +169,96 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let emailOffset = 20; // Start from 20 since we load 20 initially
+        let isLoading = false;
+
+        function loadMoreEmails() {
+            if (isLoading) return;
+            
+            isLoading = true;
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            loadMoreBtn.disabled = true;
+            loadingSpinner.classList.remove('d-none');
+            
+            fetch(`/api/load-more?offset=${emailOffset}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.emails && data.emails.length > 0) {
+                        const emailsContainer = document.getElementById('emailsContainer');
+                        
+                        // Add new emails to the container
+                        data.emails.forEach(email => {
+                            const emailHTML = `
+                                <div class="card email-item mb-3 p-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">
+                                                        <strong>${escapeHtml(email.subject)}</strong>
+                                                    </h6>
+                                                    <p class="text-muted small mb-2">
+                                                        <i class="bi bi-person"></i> ${escapeHtml(email.from)}
+                                                    </p>
+                                                    <p class="email-snippet mb-0">
+                                                        ${escapeHtml(email.snippet)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <small class="text-muted d-block mb-2">${escapeHtml(email.date)}</small>
+                                            <a href="/email/${email.id}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <button onclick="analyzeEmail('${escapeHtml(email.body)}')" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-search"></i> Analyze
+                                            </button>
+                                            <button onclick="deleteEmail('${email.id}')" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            emailsContainer.insertAdjacentHTML('beforeend', emailHTML);
+                        });
+                        
+                        // Update offset for next load
+                        emailOffset += data.emails.length;
+                        
+                        // Hide load more button if no more emails
+                        if (data.emails.length < 20) {
+                            document.getElementById('loadMoreSection').innerHTML = 
+                                '<div class="alert alert-info"><i class="bi bi-info-circle"></i> No more emails to load</div>';
+                        } else {
+                            loadMoreBtn.disabled = false;
+                            loadingSpinner.classList.add('d-none');
+                        }
+                    } else {
+                        document.getElementById('loadMoreSection').innerHTML = 
+                            '<div class="alert alert-info"><i class="bi bi-info-circle"></i> No more emails to load</div>';
+                    }
+                    
+                    isLoading = false;
+                })
+                .catch(error => {
+                    console.error('Error loading more emails:', error);
+                    loadMoreBtn.disabled = false;
+                    loadingSpinner.classList.add('d-none');
+                    isLoading = false;
+                    alert('Error loading more emails. Please try again.');
+                });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function analyzeEmail(emailBody) {
             fetch('/detect', {
                 method: 'POST',

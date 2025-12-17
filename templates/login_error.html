@@ -20,10 +20,14 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house"></i> Home
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/login">Sign In</a>
+                        <a class="nav-link" href="/login">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -44,12 +48,17 @@
                                 <h5 class="alert-heading">How to fix this:</h5>
                                 <ol class="text-start mb-0">
                                     <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
-                                    <li>Create a new project or select an existing one</li>
-                                    <li>Enable <strong>Gmail API</strong></li>
-                                    <li>Create <strong>OAuth 2.0 Web Application</strong> credentials</li>
-                                    <li>Add redirect URI: <code>http://localhost:8080/oauth2callback</code></li>
-                                    <li>Download the credentials JSON file</li>
-                                    <li>Save it as <code>credentials.json</code> in your project root directory</li>
+                                    <li>Select your project: <strong>email-spam-detector-481512</strong></li>
+                                    <li>Go to <strong>APIs & Services</strong> > <strong>Credentials</strong></li>
+                                    <li>Find your OAuth 2.0 Client ID (type: Web application)</li>
+                                    <li>Click on it and verify:
+                                        <ul>
+                                            <li><strong>Authorized redirect URIs:</strong> Must include <code>http://localhost:8080/oauth2callback</code></li>
+                                            <li>If missing, add it and click Save</li>
+                                        </ul>
+                                    </li>
+                                    <li>Download the credentials JSON file again (click the download icon)</li>
+                                    <li>Copy-paste the entire JSON content into <code>credentials.json</code> in your project root</li>
                                     <li>Refresh this page and try again</li>
                                 </ol>
                             </div>

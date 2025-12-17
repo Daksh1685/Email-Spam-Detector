@@ -16,12 +16,14 @@ def get_gmail_service(credentials):
         return None
     return build('gmail', 'v1', credentials=credentials)
 
-def get_emails(credentials, max_results=10):
+def get_emails(credentials, max_results=10, offset=0):
     """Fetch emails from Gmail or return demo emails in demo mode"""
     try:
         if DEMO_MODE:
-            # Return demo emails
-            return DEMO_EMAILS[:max_results]
+            # Return demo emails with offset support
+            start = offset
+            end = offset + max_results
+            return DEMO_EMAILS[start:end]
         
         service = get_gmail_service(credentials)
         results = service.users().messages().list(userId='me', maxResults=max_results, q='').execute()
@@ -55,7 +57,9 @@ def get_emails(credentials, max_results=10):
     except Exception as e:
         print(f"Error fetching emails: {str(e)}")
         if DEMO_MODE:
-            return DEMO_EMAILS[:max_results]
+            start = offset
+            end = offset + max_results
+            return DEMO_EMAILS[start:end]
         return []
 
 def get_message_body(parts):

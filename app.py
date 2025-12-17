@@ -52,42 +52,98 @@ def login():
     """Initiate Google OAuth login"""
     try:
         import os
-        if not os.path.exists('credentials.json'):
+        creds_path = os.path.join(os.getcwd(), 'credentials.json')
+        
+        if not os.path.exists(creds_path):
             return render_template('login_error.html', 
                 error="credentials.json not found",
-                message="Please download credentials.json from Google Cloud Console and place it in the project root directory."), 400
+                message=f"Please download credentials.json from Google Cloud Console and place it in: {creds_path}"), 400
+        
+        # Verify the credentials.json can be read and parsed
+        try:
+            with open(creds_path, 'r') as f:
+                creds_data = json.load(f)
+            if 'web' not in creds_data:
+                raise ValueError("Missing 'web' section in credentials.json")
+            web_config = creds_data['web']
+            required_fields = ['client_id', 'client_secret', 'auth_uri', 'token_uri']
+            for field in required_fields:
+                if field not in web_config:
+                    raise ValueError(f"Missing required field: {field}")
+        except json.JSONDecodeError as e:
+            return render_template('login_error.html',
+                error="Invalid credentials.json format",
+                message=f"The credentials.json file is not valid JSON: {str(e)}"), 400
+        except ValueError as e:
+            return render_template('login_error.html',
+                error="Invalid credentials.json structure",
+                message=f"The credentials.json file is missing required fields: {str(e)}"), 400
         
         flow = get_google_flow()
         authorization_url, state = flow.authorization_url(
             access_type='offline',
-            include_granted_scopes='true'
+            include_granted_scopes='true',
+            prompt='consent'
         )
-        session['state'] = state
+        
+        # Store the flow state in session for later use
+        session['oauth_state'] = state
+        session.modified = True
+        print(f"[LOGIN] Successfully created authorization URL with state: {state}")
         return redirect(authorization_url)
     except Exception as e:
+        import traceback
         error_msg = str(e)
-        if "Invalid client" in error_msg or "client_id" in error_msg:
+        full_traceback = traceback.format_exc()
+        print(f"[LOGIN ERROR] {error_msg}")
+        print(f"[LOGIN TRACEBACK]\n{full_traceback}")
+        
+        # Check for specific Google API errors
+        if "invalid_client" in error_msg.lower():
             return render_template('login_error.html',
                 error="Invalid credentials.json",
-                message="Your credentials.json file is not valid. Please download a new one from Google Cloud Console."), 400
+                message="Google rejected your credentials (invalid_client). Possible causes:<br>1. OAuth consent screen not configured<br>2. Client credentials need to be regenerated<br>3. Check redirect URI is exactly: http://localhost:8080/oauth2callback"), 400
+        elif "client_id" in error_msg.lower() or "client_secret" in error_msg.lower():
+            return render_template('login_error.html',
+                error="Invalid credentials.json",
+                message="Your credentials.json file is not valid. Check that client_id and client_secret are correct."), 400
+        
         return render_template('login_error.html',
             error="Login Error",
-            message=error_msg), 500
+            message=f"{error_msg}\n\nCheck the server logs for more details."), 500
 
 @app.route('/oauth2callback')
 def oauth2callback():
     """Handle Google OAuth callback"""
     try:
-        state = session['state']
-        flow = get_google_flow()
-        flow.fetch_token(authorization_response=request.url)
+        from google_auth_oauthlib.flow import Flow
+        import json
         
+        # Recreate the flow to handle the callback
+        flow = get_google_flow()
+        
+        # Fetch token using the authorization response
+        authorization_response = request.url
+        print(f"[OAUTH2] Handling callback with URL: {authorization_response}")
+        
+        flow.fetch_token(authorization_response=authorization_response)
+        
+        # Save credentials
         credentials = flow.credentials
         save_credentials(credentials)
         
+        print(f"[OAUTH2] Successfully saved credentials")
+        
         return redirect(url_for('dashboard'))
     except Exception as e:
-        return jsonify({'error': f"Authentication failed: {str(e)}"}), 500
+        import traceback
+        error_msg = str(e)
+        print(f"[OAUTH2 ERROR] {error_msg}")
+        traceback.print_exc()
+        
+        return render_template('login_error.html',
+            error="OAuth Callback Error",
+            message=f"Failed to complete authentication: {error_msg}"), 400
 
 @app.route('/logout')
 def logout():
@@ -128,6 +184,29 @@ def get_emails_api():
         emails = get_emails(credentials, max_results=limit)
         return jsonify({'success': True, 'emails': emails})
     except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/load-more', methods=['GET'])
+def load_more_emails():
+    """API endpoint to load more emails with pagination"""
+    try:
+        credentials = load_credentials()
+        if not credentials:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        offset = request.args.get('offset', 0, type=int)
+        limit = 20  # Load 20 emails at a time
+        
+        emails = get_emails(credentials, max_results=limit, offset=offset)
+        
+        return jsonify({
+            'success': True, 
+            'emails': emails,
+            'offset': offset,
+            'count': len(emails)
+        })
+    except Exception as e:
+        print(f"[LOAD_MORE ERROR] {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/mark-spam/<email_id>', methods=['POST'])
