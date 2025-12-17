@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Email Spam Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .email-item {
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .email-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .email-item.spam {
+            border-left-color: #dc3545;
+        }
+        .spam-badge {
+            background-color: #dc3545;
+        }
+        .ham-badge {
+            background-color: #28a745;
+        }
+        .email-item h6 {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+        .email-item p {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+        .email-snippet {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-lg">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-shield-check"></i> Email Spam Detector
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">My Emails</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Analyze Email</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5">
+        <div class="container-lg">
+            <div class="row mb-4">
+                <div class="col-lg-12">
+                    {% if demo_mode %}
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-palette"></i> <strong>DEMO MODE:</strong> You're viewing sample emails for testing. Connect real Gmail credentials to see your actual emails.
+                    </div>
+                    {% endif %}
+                    <h1 class="mb-2">
+                        <i class="bi bi-inbox"></i> My Emails
+                    </h1>
+                    <p class="text-muted">Your Gmail inbox with spam detection analysis</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div id="emailsContainer">
+                        {% if emails %}
+                            {% for email in emails %}
+                                <div class="card email-item mb-3 p-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">
+                                                        <strong>{{ email.subject }}</strong>
+                                                    </h6>
+                                                    <p class="text-muted small mb-2">
+                                                        <i class="bi bi-person"></i> {{ email.from }}
+                                                    </p>
+                                                    <p class="email-snippet mb-0">
+                                                        {{ email.snippet }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <small class="text-muted d-block mb-2">{{ email.date }}</small>
+                                            <a href="/email/{{ email.id }}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <button onclick="analyzeEmail('{{ email.body }}')" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-search"></i> Analyze
+                                            </button>
+                                            <button onclick="deleteEmail('{{ email.id }}')" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> No emails found in your inbox.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analysis Modal -->
+    <div class="modal fade" id="analysisModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Email Analysis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="analysisResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container-lg text-center">
+            <p>&copy; 2025 Email Spam Detection System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function analyzeEmail(emailBody) {
+            fetch('/detect', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email_text: emailBody
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultHTML = '';
+                if (data.success) {
+                    resultHTML = `
+                        <div class="alert alert-${data.color}">
+                            <h5>${data.result}</h5>
+                            <p>${data.message}</p>
+                            <p><strong>Confidence:</strong> ${data.confidence}%</p>
+                        </div>
+                    `;
+                } else {
+                    resultHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                }
+                document.getElementById('analysisResult').innerHTML = resultHTML;
+                new bootstrap.Modal(document.getElementById('analysisModal')).show();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function deleteEmail(emailId) {
+            if (confirm('Are you sure you want to delete this email?')) {
+                fetch(`/api/delete/${emailId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

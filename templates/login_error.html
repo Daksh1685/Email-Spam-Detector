@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Error - Email Spam Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-lg">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-shield-check"></i> Email Spam Detector
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Sign In</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5">
+        <div class="container-lg">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="card shadow-lg border-danger">
+                        <div class="card-body p-5 text-center">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                            <h2 class="card-title mt-4 text-danger">{{ error }}</h2>
+                            <p class="card-text lead mt-3">{{ message }}</p>
+                            
+                            <div class="alert alert-info mt-4" role="alert">
+                                <h5 class="alert-heading">How to fix this:</h5>
+                                <ol class="text-start mb-0">
+                                    <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+                                    <li>Create a new project or select an existing one</li>
+                                    <li>Enable <strong>Gmail API</strong></li>
+                                    <li>Create <strong>OAuth 2.0 Web Application</strong> credentials</li>
+                                    <li>Add redirect URI: <code>http://localhost:8080/oauth2callback</code></li>
+                                    <li>Download the credentials JSON file</li>
+                                    <li>Save it as <code>credentials.json</code> in your project root directory</li>
+                                    <li>Refresh this page and try again</li>
+                                </ol>
+                            </div>
+
+                            <div class="mt-4">
+                                <a href="/" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-house"></i> Back to Home
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container-lg text-center">
+            <p>&copy; 2025 Email Spam Detection System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

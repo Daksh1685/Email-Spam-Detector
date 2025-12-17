@@ -579,6 +579,41 @@ footer p {
     }
 }
 
+/* Text wrapping and overflow fixes */
+.email-item h6,
+.email-item p,
+.card h6,
+.card p,
+.info-card p,
+.contact-header .lead {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-wrap {
+    white-space: normal !important;
+}
+
+.email-item {
+    min-width: 0; /* Allow flex items to shrink below content size */
+}
+
+.email-item .flex-grow-1 {
+    min-width: 0; /* Ensure proper wrapping in flex containers */
+}
+
+.email-item .col-md-8 {
+    min-width: 0; /* Prevent overflow in grid columns */
+}
+
 @media (max-width: 576px) {
     .hero-section h1 {
         font-size: 1.8rem;
@@ -619,5 +654,9 @@ footer p {
 
     .info-card {
         padding: 20px;
+    }
+
+    .email-item .col-md-8 {
+        min-width: 0;
     }
 }

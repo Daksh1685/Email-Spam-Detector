@@ -1,2 +1,5 @@
 # Replit Configuration
+runtime = "python3.11"
 run = "python app.py"
+
+# Railway Configuration is in Procfile
