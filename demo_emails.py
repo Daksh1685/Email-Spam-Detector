@@ -1,7 +1,4 @@
-"""
-Demo email data for testing without real Gmail credentials
-"""
-
+#for testing purpose
 DEMO_EMAILS = [
     {
         'id': 'demo1',
