@@ -17,27 +17,47 @@ DEMO_MODE = False  # Set to True only for demo testing
 def get_google_flow():
     """Create and return a Google OAuth flow"""
     try:
-        if not os.path.exists(CLIENT_SECRETS_FILE):
-            raise FileNotFoundError(f"{CLIENT_SECRETS_FILE} not found. Please download credentials.json from Google Cloud Console.")
+        creds_data = None
         
-        # Verify file is readable and valid JSON
-        with open(CLIENT_SECRETS_FILE, 'r') as f:
-            creds_data = json.load(f)
+        # Try to load from environment variable first (for Railway/Production)
+        env_creds = os.environ.get('GOOGLE_CREDENTIALS_JSON')
+        if env_creds:
+            print("[AUTH] Loading credentials from environment variable GOOGLE_CREDENTIALS_JSON")
+            creds_data = json.loads(env_creds)
+        # Fall back to file (for local development)
+        elif os.path.exists(CLIENT_SECRETS_FILE):
+            print(f"[AUTH] Loading credentials from {CLIENT_SECRETS_FILE}")
+            with open(CLIENT_SECRETS_FILE, 'r') as f:
+                creds_data = json.load(f)
+        else:
+            raise FileNotFoundError(
+                f"{CLIENT_SECRETS_FILE} not found.\n"
+                "For local development: Download credentials.json from Google Cloud Console\n"
+                "For Railway deployment: Set GOOGLE_CREDENTIALS_JSON environment variable with the JSON content"
+            )
         
-        print(f"[AUTH] Loading credentials from {CLIENT_SECRETS_FILE}")
         print(f"[AUTH] Credentials structure: {list(creds_data.keys())}")
         
-        flow = Flow.from_client_secrets_file(
-            CLIENT_SECRETS_FILE,
+        # Determine redirect URI based on environment
+        if os.environ.get('RAILWAY_ENVIRONMENT'):
+            redirect_uri = f"https://{os.environ.get('RAILWAY_PUBLIC_DOMAIN')}/oauth2callback"
+        else:
+            redirect_uri = 'http://localhost:8080/oauth2callback'
+        
+        print(f"[AUTH] Using redirect URI: {redirect_uri}")
+        
+        # Create flow from credentials dict
+        flow = Flow.from_client_config(
+            creds_data,
             scopes=SCOPES,
-            redirect_uri='http://localhost:8080/oauth2callback',
-            state=None  # Let Google generate the state
+            redirect_uri=redirect_uri,
+            state=None
         )
         print("[AUTH] OAuth flow created successfully")
         return flow
     except json.JSONDecodeError as e:
         print(f"[AUTH ERROR] JSON parse error: {str(e)}")
-        raise ValueError(f"credentials.json is not valid JSON: {str(e)}")
+        raise ValueError(f"Credentials JSON is not valid: {str(e)}")
     except Exception as e:
         print(f"[AUTH ERROR] {str(e)}")
         raise
