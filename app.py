@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from flask_session import Session
 import pickle
 import os
@@ -46,6 +46,16 @@ def index():
     if credentials:
         return redirect(url_for('dashboard'))
     return render_template('index.html')
+
+@app.route('/robots.txt')
+def robots():
+    """Serve robots.txt file"""
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt')
+
+@app.route('/health')
+def health():
+    """Health check endpoint for Railway"""
+    return jsonify({'status': 'healthy'}), 200
 
 @app.route('/login')
 def login():
