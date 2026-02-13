@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from flask_session import Session
+from werkzeug.proxy_fix import ProxyFix
 import pickle
 import os
 from sklearn.feature_extraction.text import CountVectorizer
@@ -16,6 +17,11 @@ import json
 warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
+
+# Configure to trust proxy headers (for Railway deployment)
+# This tells Flask to trust X-Forwarded-Proto and X-Forwarded-For headers from the reverse proxy
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+
 app.config['SESSION_TYPE'] = 'filesystem'
 app.secret_key = 'your-secret-key-change-this'
 Session(app)
