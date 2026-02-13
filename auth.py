@@ -5,8 +5,9 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 import pickle
 
-# Allow insecure transport for local development (localhost only)
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# Allow insecure transport ONLY for local development
+if not os.environ.get('RAILWAY_ENVIRONMENT'):
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Configuration
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']

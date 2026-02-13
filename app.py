@@ -62,32 +62,43 @@ def login():
     """Initiate Google OAuth login"""
     try:
         import os
+        is_railway = bool(os.environ.get('RAILWAY_ENVIRONMENT'))
         creds_path = os.path.join(os.getcwd(), 'credentials.json')
         
-        if not os.path.exists(creds_path):
-            return render_template('login_error.html', 
-                error="credentials.json not found",
-                message=f"Please download credentials.json from Google Cloud Console and place it in: {creds_path}"), 400
-        
-        # Verify the credentials.json can be read and parsed
-        try:
-            with open(creds_path, 'r') as f:
-                creds_data = json.load(f)
-            if 'web' not in creds_data:
-                raise ValueError("Missing 'web' section in credentials.json")
-            web_config = creds_data['web']
-            required_fields = ['client_id', 'client_secret', 'auth_uri', 'token_uri']
-            for field in required_fields:
-                if field not in web_config:
-                    raise ValueError(f"Missing required field: {field}")
-        except json.JSONDecodeError as e:
-            return render_template('login_error.html',
-                error="Invalid credentials.json format",
-                message=f"The credentials.json file is not valid JSON: {str(e)}"), 400
-        except ValueError as e:
-            return render_template('login_error.html',
-                error="Invalid credentials.json structure",
-                message=f"The credentials.json file is missing required fields: {str(e)}"), 400
+        # On Railway, credentials come from environment variable not file
+        if is_railway:
+            if not os.environ.get('GOOGLE_CREDENTIALS_JSON'):
+                return render_template('login_error.html', 
+                    error="Google Credentials Not Configured",
+                    message="<strong>Railway Configuration Required:</strong><br>" +
+                            "Set the <code>GOOGLE_CREDENTIALS_JSON</code> environment variable:<br><br>" +
+                            "1. Go to Railway dashboard<br>" +
+                            "2. Click your service<br>" +
+                            "3. Go to <strong>Variables</strong> tab<br>" +
+                            "4. Add <code>GOOGLE_CREDENTIALS_JSON</code> with your full credentials.json content<br>" +
+                            "5. Add <code>RAILWAY_PUBLIC_DOMAIN</code> with your Railway domain<br>" +
+                            "6. Click <strong>Redeploy</strong>"), 400
+        else:
+            # Local development - validate credentials.json file exists
+            if not os.path.exists(creds_path):
+                return render_template('login_error.html', 
+                    error="credentials.json not found",
+                    message=f"Please download credentials.json from Google Cloud Console and place it in: {creds_path}"), 400
+            
+            # Verify the credentials.json can be read and parsed
+            try:
+                with open(creds_path, 'r') as f:
+                    creds_data = json.load(f)
+                if 'web' not in creds_data and 'installed' not in creds_data:
+                    raise ValueError("Missing 'web' or 'installed' section in credentials.json")
+            except json.JSONDecodeError as e:
+                return render_template('login_error.html',
+                    error="Invalid credentials.json format",
+                    message=f"The credentials.json file is not valid JSON: {str(e)}"), 400
+            except ValueError as e:
+                return render_template('login_error.html',
+                    error="Invalid credentials.json structure",
+                    message=f"The credentials.json file is missing required fields: {str(e)}"), 400
         
         flow = get_google_flow()
         authorization_url, state = flow.authorization_url(
@@ -111,12 +122,18 @@ def login():
         # Check for specific Google API errors
         if "invalid_client" in error_msg.lower():
             return render_template('login_error.html',
-                error="Invalid credentials.json",
-                message="Google rejected your credentials (invalid_client). Possible causes:<br>1. OAuth consent screen not configured<br>2. Client credentials need to be regenerated<br>3. Check redirect URI is exactly: http://localhost:8080/oauth2callback"), 400
-        elif "client_id" in error_msg.lower() or "client_secret" in error_msg.lower():
+                error="Invalid credentials",
+                message="Google rejected your credentials (invalid_client).<br><br>" +
+                        "<strong>Common fixes:</strong><br>" +
+                        "1. For Railway: Update Google Cloud Console with your Railway domain in Authorized redirect URIs<br>" +
+                        "2. OAuth consent screen not properly configured<br>" +
+                        "3. Credentials need to be regenerated"), 400
+        elif "credentials" in error_msg.lower():
             return render_template('login_error.html',
-                error="Invalid credentials.json",
-                message="Your credentials.json file is not valid. Check that client_id and client_secret are correct."), 400
+                error="Credentials Configuration Error",
+                message="Credentials are not properly configured.<br>" +
+                        "For Railway: Make sure GOOGLE_CREDENTIALS_JSON environment variable is set<br>" +
+                        "For local: Make sure credentials.json file exists"), 400
         
         return render_template('login_error.html',
             error="Login Error",
