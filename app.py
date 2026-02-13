@@ -62,7 +62,7 @@ def login():
     """Initiate Google OAuth login"""
     try:
         import os
-        is_railway = bool(os.environ.get('RAILWAY_ENVIRONMENT'))
+        is_railway = bool(os.environ.get('RAILWAY_PUBLIC_DOMAIN') or os.environ.get('RAILWAY_ENVIRONMENT'))
         creds_path = os.path.join(os.getcwd(), 'credentials.json')
         
         # On Railway, credentials come from environment variable not file

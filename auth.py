@@ -5,8 +5,11 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 import pickle
 
-# Allow insecure transport ONLY for local development
-if not os.environ.get('RAILWAY_ENVIRONMENT'):
+# Detect if running on Railway (check for Railway-specific variables)
+IS_RAILWAY = bool(os.environ.get('RAILWAY_PUBLIC_DOMAIN') or os.environ.get('RAILWAY_ENVIRONMENT'))
+
+# Allow insecure transport ONLY for local development (not on Railway)
+if not IS_RAILWAY:
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Configuration
@@ -40,7 +43,7 @@ def get_google_flow():
         print(f"[AUTH] Credentials structure: {list(creds_data.keys())}")
         
         # Determine redirect URI based on environment
-        if os.environ.get('RAILWAY_ENVIRONMENT'):
+        if IS_RAILWAY:
             redirect_uri = f"https://{os.environ.get('RAILWAY_PUBLIC_DOMAIN')}/oauth2callback"
         else:
             redirect_uri = 'http://localhost:8080/oauth2callback'
