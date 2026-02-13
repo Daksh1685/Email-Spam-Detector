@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from flask_session import Session
-from werkzeug.proxy_fix import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 import pickle
 import os
 from sklearn.feature_extraction.text import CountVectorizer
