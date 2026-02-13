@@ -1,10 +1,4 @@
 # Machine Learning based Email Spam Detection using NLP
-
-![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Naive%20Bayes-blue)
-![NLP](https://img.shields.io/badge/NLP-TF--IDF-green)
-![Framework](https://img.shields.io/badge/Framework-Flask-black)
-![Status](https://img.shields.io/badge/Status-Completed-success)
-
 ---
 
 ## Overview
